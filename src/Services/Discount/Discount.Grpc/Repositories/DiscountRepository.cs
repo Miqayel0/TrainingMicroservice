@@ -7,9 +7,9 @@ namespace Discount.Grpc.Repositories
 {
     public class DiscountRepository : IDiscountRepository
     {
-        private readonly INpgSqlConnection _connection;
+        private readonly INpgSqlConnectionPool _connection;
 
-        public DiscountRepository(INpgSqlConnection connection)
+        public DiscountRepository(INpgSqlConnectionPool connection)
         {
             _connection = connection;
         }
