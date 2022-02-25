@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using Discount.Grpc.Entities;
 using Discount.Grpc.NpgSqlConnections;
-using Npgsql;
 
 namespace Discount.Grpc.Repositories
 {
@@ -22,8 +21,7 @@ namespace Discount.Grpc.Repositories
                 ("SELECT * FROM Coupon WHERE ProductName = @ProductName", new { ProductName = productName });
 
             if (coupon == null)
-                return new Coupon
-                { ProductName = "No Discount", Amount = 0, Description = "No Discount Desc" };
+                return Coupon.NotFound;
 
             return coupon;
         }
@@ -32,15 +30,11 @@ namespace Discount.Grpc.Repositories
         {
             var connection = _connection.GetConnection();
 
-            var affected =
-                await connection.ExecuteAsync
+            var affected = await connection.ExecuteAsync
                     ("INSERT INTO Coupon (ProductName, Description, Amount) VALUES (@ProductName, @Description, @Amount)",
-                            new { ProductName = coupon.ProductName, Description = coupon.Description, Amount = coupon.Amount });
+                            new { coupon.ProductName, coupon.Description, coupon.Amount });
 
-            if (affected == 0)
-                return false;
-
-            return true;
+            return affected != default;
         }
 
         public async Task<bool> UpdateDiscount(Coupon coupon)
@@ -49,12 +43,9 @@ namespace Discount.Grpc.Repositories
 
             var affected = await connection.ExecuteAsync
                     ("UPDATE Coupon SET ProductName=@ProductName, Description = @Description, Amount = @Amount WHERE Id = @Id",
-                            new { ProductName = coupon.ProductName, Description = coupon.Description, Amount = coupon.Amount, Id = coupon.Id });
+                            new { coupon.ProductName, coupon.Description, coupon.Amount, coupon.Id });
 
-            if (affected == 0)
-                return false;
-
-            return true;
+            return affected != default;
         }
 
         public async Task<bool> DeleteDiscount(string productName)
@@ -64,10 +55,7 @@ namespace Discount.Grpc.Repositories
             var affected = await connection.ExecuteAsync("DELETE FROM Coupon WHERE ProductName = @ProductName",
                 new { ProductName = productName });
 
-            if (affected == 0)
-                return false;
-
-            return true;
+            return affected != default;
         }
     }
 }
