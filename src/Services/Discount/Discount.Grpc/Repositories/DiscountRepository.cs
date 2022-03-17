@@ -20,10 +20,7 @@ namespace Discount.Grpc.Repositories
             var coupon = await connection.QueryFirstOrDefaultAsync<Coupon>
                 ("SELECT * FROM Coupon WHERE ProductName = @ProductName", new { ProductName = productName });
 
-            if (coupon == null)
-                return Coupon.NotFound;
-
-            return coupon;
+            return coupon ?? Coupon.NotFound;
         }
 
         public async Task<bool> CreateDiscount(Coupon coupon)
